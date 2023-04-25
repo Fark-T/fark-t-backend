@@ -12,6 +12,7 @@ public class AppDbContext : DbContext
     public DbSet<Users> Users { get; set; }
     public DbSet<Deposit> Deposits { get; set; }
     public DbSet<Orders> Orders { get; set; }
+    public DbSet<Fark> Farks { get; set; }
 
    
 }

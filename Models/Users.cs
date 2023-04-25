@@ -4,10 +4,6 @@ namespace fark_t_backend.Models
 {
     public class Users
     {
-        public Users()
-        {
-            // Constructor logic here (if any)
-        }
 
         [Key]
         public int Id { get; set; }
