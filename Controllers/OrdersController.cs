@@ -1,4 +1,5 @@
-﻿using AutoMapper;
+﻿using System.Security.Claims;
+using AutoMapper;
 using fark_t_backend.Data;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -24,18 +25,22 @@ public class OrdersController : ControllerBase
     }
     
     [HttpGet("order")]
-    public async Task<ActionResult<List<GetOrdersDto>>> GetOrders([FromQuery(Name = "id")] Guid id)
+    public async Task<ActionResult<List<GetOrdersDto>>> GetOrders()
     {
+        var loggedInUserId =  Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
         var orders = await _dbContext.Orders
-            .Where(o => o.User.ID!= id)
+            .Where(o => o.User.ID != loggedInUserId)
             .Include(o => o.User)
             .ToListAsync();
-        if (!orders.Any()) return NotFound();
+        if (!orders.Any())
+        {
+            return NotFound();
+        }
         return orders.Select(o =>_mapper.Map<GetOrdersDto>(o)).ToList();
     }
 
     [HttpGet("order/{id}")]
-    public async Task<ActionResult<GetOrdersDto?>> GetOrder([FromQuery(Name = "id")] Guid id)
+    public async Task<ActionResult<GetOrdersDto?>> GetOrder(Guid id)
     {
         var order = await _dbContext.Orders
             .Include(o => o.User)
@@ -46,8 +51,8 @@ public class OrdersController : ControllerBase
         return _mapper.Map<GetOrdersDto>(order);
     }
 
-    [HttpGet("myorder")]
-    public async Task<ActionResult<List<GetOrdersDto>>> GetMyOrder([FromQuery(Name = "id")] Guid id)
+    [HttpGet("myorder/{id}")]
+    public async Task<ActionResult<List<GetOrdersDto>>> GetMyOrder(Guid id)
     {
         var myOrder = await _dbContext.Orders
             .Where(o => o.User.ID == id)
@@ -97,4 +102,36 @@ public class OrdersController : ControllerBase
         await _dbContext.SaveChangesAsync();
         return CreatedAtAction("GetOrder", new { id = newOrder.ID }, newOrder); 
     }
+
+    [HttpPut("order/update/status")]
+    public async Task<ActionResult<UpdateStatusOrderDto>> UpdateStatus(UpdateStatusOrderDto request)
+    {
+        var order = await _dbContext.Orders
+            .Include(o => o.User)
+            .FirstOrDefaultAsync(o => o.ID == request.ID);
+
+        if (order == null)
+        {
+            return NotFound();
+        }
+
+        _mapper.Map(request, order);
+
+        if (order.Status == false)
+        {
+            if (order.User != null)
+            {
+                order.User.Coin += Int32.Abs(order.Count);
+            }
+            else
+            {
+                return NotFound();
+            }
+        }
+
+        await _dbContext.SaveChangesAsync();
+
+        return Ok();
+    }
+
 }
