@@ -39,7 +39,8 @@ namespace fark_t_backend.Controllers
             var id = _contextProvider.GetCurrentUser();
             var user = await _appDbContext.Users.FirstOrDefaultAsync(u => u.ID == id);
             if (user == null) return Forbid();
-            return Ok(user);
+            var newUser = _mapper.Map<GetUserDto>(user);
+            return Ok(newUser);
         }
 
         [HttpPut("{id}")]
