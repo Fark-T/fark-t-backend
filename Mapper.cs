@@ -14,6 +14,7 @@ public class Mapper : Profile
         CreateMap<UpdateStatusOrderDto,Orders>();
         
         CreateMap<Users,GetUserDto>();
-       
+        CreateMap<Deposit, GetDepositDto>();
+        CreateMap<CreateDepositDto, Deposit>();
     }
 }

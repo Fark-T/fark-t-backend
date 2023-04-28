@@ -4,6 +4,10 @@ namespace fark_t_backend.Models
 {
     public class Orders
     {
+        public Orders()
+        {
+            // Constructor logic here (if any)
+        }
         [Key]
         public Guid ID { get; set; }
         public string Restaurant { get; set; }
