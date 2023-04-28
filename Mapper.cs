@@ -12,6 +12,6 @@ public class Mapper : Profile
         CreateMap<OrdersDto, Orders>();
         CreateMap<Users,GetUserDto>();
         CreateMap<CreateUserDto, Users>();
-
+        CreateMap<UpdateUserDto, Users>();
     }
 }

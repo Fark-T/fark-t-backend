@@ -2,10 +2,8 @@
 
 namespace fark_t_backend.Dto
 {
-    public class CreateUserDto
+    public class UpdateUserDto
     {
-        [Required]
-        public string Username { get; set; }
         [Required]
         public string Password { get; set; }
         [Required]
