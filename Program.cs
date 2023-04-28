@@ -1,6 +1,7 @@
 using fark_t_backend.Data;
 using Microsoft.EntityFrameworkCore;
 
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -16,6 +17,18 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.AddAutoMapper(typeof(Program).Assembly);
 
+var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(MyAllowSpecificOrigins,
+        policy =>
+        {
+            policy.WithOrigins("http://example.com",
+                    "http://www.contoso.com")
+                .AllowAnyHeader()
+                .AllowAnyMethod();
+        });
+});
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -26,7 +39,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
+app.UseCors(MyAllowSpecificOrigins);
 app.UseAuthorization();
 
 app.MapControllers();
