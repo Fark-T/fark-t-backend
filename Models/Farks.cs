@@ -4,12 +4,12 @@ using System.ComponentModel.Design;
 
 namespace fark_t_backend.Models
 {
-    public class Fark
+    public class Farks
     {
 
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public Guid fark_id { get; set; }
+        public Guid Fark_Id { get; set; }
         public string menu { get; set; }
         public string location { get; set; }
         public string status { get; set; }
