@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using fark_t_backend.Models;
+using fark_t_backend.RequestModel;
 
 
 namespace fark_t_backend.Controllers;
@@ -130,52 +131,43 @@ public class OrdersController : ControllerBase
         return NoContent();
     }
     
-    // [HttpPost("order/create")]
-    // public async Task<ActionResult<Orders>> CreateOrder(
-    //     string restaurant, 
-    //     string category, 
-    //     int limit, 
-    //     int count, 
-    //     string status, 
-    //     int userId)
-    // {
-    //     var user = await _dbContext.Users.FindAsync(userId);
-    //     if (user == null)
-    //     {
-    //         return BadRequest();
-    //     }
-    //
-    //     var newOrder = new Orders
-    //     {
-    //         Restaurant = restaurant,
-    //         Category = category,
-    //         Limit = limit,
-    //         Count = count,
-    //         Status = status,
-    //         User = user
-    //     };
-    //
-    //     _dbContext.Orders.Add(newOrder);
-    //     await _dbContext.SaveChangesAsync();
-    //
-    //     return CreatedAtAction("GetOrder", new { id = newOrder.Order_Id }, newOrder);
-    // }
-
     [HttpPost("order/create")]
-    public async Task<ActionResult<Orders>> CreateOrderAsync(Orders order, Guid userId)
+    public async Task<ActionResult<Orders>> CreateOrder(CreateOrderRequest order)
     {
-        // Retrieve the user associated with the given userId
-        Users user = await _dbContext.Users.FindAsync(userId);
-        if (user == null)
-        {
+        var user = await _dbContext.Users.FirstOrDefaultAsync( u=> u.Id == order.User_Id);
+        if(user is null){
             return NotFound();
         }
-        order.User = user;
-        order.Order_Id = Guid.NewGuid();
-        
-        _dbContext.Orders.Add(order);
+
+        var newOrder = new Orders
+        {
+            Restaurant = order.Restaurant,
+            Category = order.Category,
+            Limit = order.Limit,
+            Count = order.Count,
+            Status = order.Status,
+            User = user
+        };
+        _dbContext.Orders.Add(newOrder);
         await _dbContext.SaveChangesAsync();
-        
-        return CreatedAtAction("GetOrder", new { id = order.Order_Id }, order);
+        return CreatedAtAction("GetOrder", new { id = newOrder.Order_Id }, order); 
     }
+
+    // [HttpPost("order/create")]
+    // public async Task<ActionResult<Orders>> CreateOrderAsync(Orders order, Guid userId)
+    // {
+    //     // Retrieve the user associated with the given userId
+    //     Users user = await _dbContext.Users.FindAsync(userId);
+    //     if (user == null)
+    //     {
+    //         return NotFound();
+    //     }
+    //     order.User = user;
+    //     order.Order_Id = Guid.NewGuid();
+    //     
+    //     _dbContext.Orders.Add(order);
+    //     await _dbContext.SaveChangesAsync();
+    //     
+    //     return CreatedAtAction("GetOrder", new { id = order.Order_Id }, order);
+    // }
 }
