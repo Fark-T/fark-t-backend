@@ -1,8 +1,9 @@
-﻿using fark_t_backend.Data;
+﻿using AutoMapper;
+using fark_t_backend.Data;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using fark_t_backend.Models;
-using fark_t_backend.RequestModel;
+using fark_t_backend.Dto;
 
 
 namespace fark_t_backend.Controllers;
@@ -13,96 +14,44 @@ public class OrdersController : ControllerBase
 {
     private readonly ILogger<OrdersController> _logger;
     private readonly AppDbContext _dbContext;
+    private readonly IMapper _mapper;
 
-    public OrdersController(ILogger<OrdersController> logger, AppDbContext dbContext)
+    public OrdersController(ILogger<OrdersController> logger, AppDbContext dbContext, IMapper mapper)
     {
         _logger = logger;
         _dbContext = dbContext;
+        _mapper = mapper;
     }
     
     [HttpGet("order")]
-    public async Task<ActionResult<List<Orders>>> GetOrders([FromQuery(Name = "id")] Guid id)
+    public async Task<ActionResult<List<GetOrdersDto>>> GetOrders([FromQuery(Name = "id")] Guid id)
     {
         var orders = await _dbContext.Orders
-            .Where(o => o.User.Id != id)
+            .Where(o => o.User.ID!= id)
             .Include(o => o.User)
-            .Select(o=>new Orders
-            {
-                Order_Id = o.Order_Id,
-                Restaurant = o.Restaurant,
-                Category = o.Category,
-                Limit = o.Limit,
-                Count = o.Count,
-                User = new Users
-                {
-                    Id = o.User.Id,
-                    Username = o.User.Username,
-                    Fname = o.User.Fname,
-                    Lname = o.User.Lname,
-                    Phone = o.User.Phone,
-                    Coin = o.User.Coin
-                }
-                
-            })
             .ToListAsync();
         if (!orders.Any()) return NotFound();
-        return orders;
+        return orders.Select(o =>_mapper.Map<GetOrdersDto>(o)).ToList();
     }
 
     [HttpGet("order/{id}")]
-    public async Task<ActionResult<Orders?>> GetOrder([FromQuery(Name = "id")] Guid id)
+    public async Task<ActionResult<GetOrdersDto?>> GetOrder([FromQuery(Name = "id")] Guid id)
     {
         var order = await _dbContext.Orders
             .Include(o => o.User)
-            .Select(o=>new Orders
-            {
-                Order_Id = o.Order_Id,
-                Restaurant = o.Restaurant,
-                Category = o.Category,
-                Limit = o.Limit,
-                Count = o.Count,
-                User = new Users
-                {
-                    Id = o.User.Id,
-                    Username = o.User.Username,
-                    Fname = o.User.Fname,
-                    Lname = o.User.Lname,
-                    Phone = o.User.Phone,
-                    Coin = o.User.Coin
-                }
-                
-            })
-            .FirstOrDefaultAsync(orders => orders.Order_Id == id);
+            .FirstOrDefaultAsync(orders => orders.ID == id);
         if(order == null){
             return NotFound();
         }
-        return order;
+        return _mapper.Map<GetOrdersDto>(order);
     }
 
     [HttpGet("myorder")]
-    public async Task<ActionResult<List<Orders>>> GetMyOrder([FromQuery(Name = "id")] Guid id)
+    public async Task<ActionResult<List<GetOrdersDto>>> GetMyOrder([FromQuery(Name = "id")] Guid id)
     {
         var myOrder = await _dbContext.Orders
-            .Where(o => o.User.Id == id)
+            .Where(o => o.User.ID == id)
             .Include(o => o.User)
-            .Select(o=>new Orders
-            {
-                Order_Id = o.Order_Id,
-                Restaurant = o.Restaurant,
-                Category = o.Category,
-                Limit = o.Limit,
-                Count = o.Count,
-                User = new Users
-                {
-                    Id = o.User.Id,
-                    Username = o.User.Username,
-                    Fname = o.User.Fname,
-                    Lname = o.User.Lname,
-                    Phone = o.User.Phone,
-                    Coin = o.User.Coin
-                }
-                
-            })
             .ToListAsync();
 
         if (!myOrder.Any())
@@ -110,7 +59,7 @@ public class OrdersController : ControllerBase
             return NotFound();
         }
 
-        return myOrder;
+        return myOrder.Select(o =>_mapper.Map<GetOrdersDto>(o)).ToList();;
     }
     
     [HttpDelete("order/delete/{id}")]
@@ -118,7 +67,7 @@ public class OrdersController : ControllerBase
     {
         var order = await _dbContext.Orders.FindAsync(id);
         var depositList = await _dbContext.Deposits
-            .Where(d => d.D_id == id)
+            .Where(d => d.ID == id)
             .Include(d => d.Order)
             .ToListAsync();
         if (order == null)
@@ -132,42 +81,20 @@ public class OrdersController : ControllerBase
     }
     
     [HttpPost("order/create")]
-    public async Task<ActionResult<Orders>> CreateOrder(CreateOrderRequest order)
+    public async Task<ActionResult<GetOrdersDto>> CreateOrder(OrdersDto request)
     {
-        var user = await _dbContext.Users.FirstOrDefaultAsync( u=> u.Id == order.User_Id);
+        var user = await _dbContext.Users.FirstOrDefaultAsync( u=> u.ID == request.UserID);
         if(user is null){
             return NotFound();
         }
 
-        var newOrder = new Orders
-        {
-            Restaurant = order.Restaurant,
-            Category = order.Category,
-            Limit = order.Limit,
-            Count = order.Count,
-            Status = order.Status,
-            User = user
-        };
+        var newOrder = _mapper.Map<Orders>(request);
+        newOrder.ID = Guid.NewGuid();
+        newOrder.User = user;
+
+
         _dbContext.Orders.Add(newOrder);
         await _dbContext.SaveChangesAsync();
-        return CreatedAtAction("GetOrder", new { id = newOrder.Order_Id }, order); 
+        return CreatedAtAction("GetOrder", new { id = newOrder.ID }, newOrder); 
     }
-
-    // [HttpPost("order/create")]
-    // public async Task<ActionResult<Orders>> CreateOrderAsync(Orders order, Guid userId)
-    // {
-    //     // Retrieve the user associated with the given userId
-    //     Users user = await _dbContext.Users.FindAsync(userId);
-    //     if (user == null)
-    //     {
-    //         return NotFound();
-    //     }
-    //     order.User = user;
-    //     order.Order_Id = Guid.NewGuid();
-    //     
-    //     _dbContext.Orders.Add(order);
-    //     await _dbContext.SaveChangesAsync();
-    //     
-    //     return CreatedAtAction("GetOrder", new { id = order.Order_Id }, order);
-    // }
 }
