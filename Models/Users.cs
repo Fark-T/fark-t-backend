@@ -4,6 +4,10 @@ namespace fark_t_backend.Models
 {
     public class Users
     {
+        [Key]
+        
+        public Guid ID { get; set; }
+        }
 
         [Key]
         public int Id { get; set; }
@@ -12,6 +16,6 @@ namespace fark_t_backend.Models
         public string Fname { get; set; }
         public string Lname { get; set; }
         public string Phone { get; set; }
-        public int Coin { get; set; }
+        public int Coin { get; set; } = 3;
     }
 }

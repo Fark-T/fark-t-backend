@@ -9,11 +9,12 @@ namespace fark_t_backend.Models
             // Constructor logic here (if any)
         }
         [Key]
-        public Guid Order_Id { get; set; }
+        public Guid ID { get; set; }
         public string Restaurant { get; set; }
         public string Category { get; set; }
         public int Limit { get; set; }
         public int Count { get; set; }
+        public bool Status { get; set; } = true;
 
         // Navigation property
         public Users User { get; set; } = null!;
