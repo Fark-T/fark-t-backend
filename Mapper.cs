@@ -9,11 +9,11 @@ public class Mapper : Profile
     public Mapper()
     {
         CreateMap<Orders,GetOrdersDto>();
-        CreateMap<OrdersDto, Orders>();
-        
-        CreateMap<UpdateStatusOrderDto,Orders>();
-        
+        CreateMap<OrdersDto, Orders>();      
+        CreateMap<UpdateStatusOrderDto,Orders>();   
         CreateMap<Users,GetUserDto>();
+        CreateMap<CreateUserDto, Users>();
+        CreateMap<UpdateUserDto, Users>();
         CreateMap<Deposit, GetDepositDto>();
         CreateMap<CreateDepositDto, Deposit>();
     }
