@@ -7,10 +7,6 @@ namespace fark_t_backend.Models
         [Key]
         
         public Guid ID { get; set; }
-        }
-
-        [Key]
-        public int Id { get; set; }
         public string Username { get; set; } = null!;
         public string Password { get; set; } = null!;
         public string Fname { get; set; }
