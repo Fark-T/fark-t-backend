@@ -23,21 +23,30 @@ namespace fark_t_backend.Controllers
         [HttpGet("fark/{id}")]
         public async Task<ActionResult<GetDepositDto>> GetFarkbyID(Guid id)
         {
-            var fark = await _dbContext.Deposits.Include(f => f.User).Include(f => f.Order).FirstOrDefaultAsync(Deposit => Deposit.ID == id);
+            var fark = await _dbContext.Deposits
+                .Include(f => f.Order)
+                .Include(f => f.User)
+                .Include(f => f.Order.User)
+                .FirstOrDefaultAsync(Deposit => Deposit.ID == id);
             if (fark is null)
             {
                 return BadRequest();
             }
-            return _mapper.Map<GetDepositDto>(fark);
+
+            return Ok(_mapper.Map<GetDepositDto>(fark));
         }
 
         [HttpGet("fark/myfark/{userId}")]
         public async Task<ActionResult<List<GetDepositDto>>> GetFarkbyuserID(Guid userId)
         {
-            var userFarkModels = await _dbContext.Deposits.Include(f => f.User).Include(f => f.Order).Where(f => f.User.ID == userId).ToListAsync();
+            var userFarkModels = await _dbContext.Deposits
+                .Include(f => f.User)
+                .Include(f => f.Order)
+                .Include(f => f.Order.User)
+                .Where(f => f.User.ID == userId).ToListAsync();
             if (userFarkModels is null)
                 return NotFound();
-            Console.WriteLine(userFarkModels[0].ID);
+  
             return Ok(userFarkModels.Select(user => _mapper.Map<GetDepositDto>(user)).ToList());
         }
 
@@ -79,7 +88,10 @@ namespace fark_t_backend.Controllers
         [HttpPut("fark/status/{id}")]
         public async Task<ActionResult<List<Deposit>>> UpdateFark(Guid id)
         {
-            var fark = await _dbContext.Deposits.Include(f => f.User).Include(f => f.Order).FirstOrDefaultAsync(f => f.ID == id);
+            var fark = await _dbContext.Deposits
+                .Include(f => f.User)
+                .Include(f => f.Order)
+                .FirstOrDefaultAsync(f => f.ID == id);
 
             if (fark is null)
                 return NotFound();
@@ -93,7 +105,10 @@ namespace fark_t_backend.Controllers
         [HttpDelete("fark/{id}")]
         public async Task<ActionResult> DeleteFark(Guid id)
         {
-            var fark = await _dbContext.Deposits.Include(f => f.User).Include(f => f.Order).FirstOrDefaultAsync(Deposit => Deposit.ID == id);
+            var fark = await _dbContext.Deposits
+                .Include(f => f.User)
+                .Include(f => f.Order)
+                .FirstOrDefaultAsync(Deposit => Deposit.ID == id);
 
             if (fark is null)
                 return NotFound();
