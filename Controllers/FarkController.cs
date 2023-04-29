@@ -4,11 +4,13 @@ using fark_t_backend.Dto;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 
 namespace fark_t_backend.Controllers
 {
     [Route("/api")]
     [ApiController]
+    [Authorize]
     public class FarkController : ControllerBase
     {
         private readonly AppDbContext _dbContext;

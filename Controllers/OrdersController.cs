@@ -6,12 +6,13 @@ using Microsoft.EntityFrameworkCore;
 using fark_t_backend.Models;
 using fark_t_backend.Dto;
 using fark_t_backend.Provider;
-
+using Microsoft.AspNetCore.Authorization;
 
 namespace fark_t_backend.Controllers;
 
 [ApiController]
 [Route("/api")]
+[Authorize]
 public class OrdersController : ControllerBase
 {
     private readonly ILogger<OrdersController> _logger;
@@ -19,14 +20,15 @@ public class OrdersController : ControllerBase
     private readonly IMapper _mapper;
     private readonly IHttpContextProvider _contextProvider;
 
-    public OrdersController(ILogger<OrdersController> logger, AppDbContext dbContext, IMapper mapper ,IHttpContextProvider contextProvider)
+    public OrdersController(ILogger<OrdersController> logger, AppDbContext dbContext, IMapper mapper, IHttpContextProvider contextProvider)
     {
         _logger = logger;
         _dbContext = dbContext;
         _mapper = mapper;
         _contextProvider = contextProvider;
     }
-    
+
+    [AllowAnonymous]
     [HttpGet("order")]
     public async Task<ActionResult<List<GetOrdersDto>>> GetOrders()
     {
