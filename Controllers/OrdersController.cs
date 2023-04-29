@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using fark_t_backend.Models;
 using fark_t_backend.Dto;
+using fark_t_backend.Provider;
 
 
 namespace fark_t_backend.Controllers;
@@ -16,20 +17,22 @@ public class OrdersController : ControllerBase
     private readonly ILogger<OrdersController> _logger;
     private readonly AppDbContext _dbContext;
     private readonly IMapper _mapper;
+    private readonly IHttpContextProvider _contextProvider;
 
-    public OrdersController(ILogger<OrdersController> logger, AppDbContext dbContext, IMapper mapper)
+    public OrdersController(ILogger<OrdersController> logger, AppDbContext dbContext, IMapper mapper ,IHttpContextProvider contextProvider)
     {
         _logger = logger;
         _dbContext = dbContext;
         _mapper = mapper;
+        _contextProvider = contextProvider;
     }
     
     [HttpGet("order")]
     public async Task<ActionResult<List<GetOrdersDto>>> GetOrders()
     {
-        var loggedInUserId =  Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+        var id = _contextProvider.GetCurrentUser();
         var orders = await _dbContext.Orders
-            .Where(o => o.User.ID != loggedInUserId)
+            .Where(o => o.User.ID != id)
             .Include(o => o.User)
             .ToListAsync();
         if (!orders.Any())
@@ -97,10 +100,9 @@ public class OrdersController : ControllerBase
         newOrder.ID = Guid.NewGuid();
         newOrder.User = user;
 
-
         _dbContext.Orders.Add(newOrder);
         await _dbContext.SaveChangesAsync();
-        return CreatedAtAction("GetOrder", new { id = newOrder.ID }, newOrder); 
+        return CreatedAtAction("GetOrder", new { id = newOrder.ID }, _mapper.Map<GetOrdersDto>(newOrder)); 
     }
 
     [HttpPut("order/update/status")]

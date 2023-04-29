@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using fark_t_backend.Dto;
 
 namespace fark_t_backend.Models
 {
