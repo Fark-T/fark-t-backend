@@ -124,10 +124,12 @@ namespace fark_t_backend.Controllers
                 .Include(f => f.Order)
                 .FirstOrDefaultAsync(Deposit => Deposit.ID == id);
 
-            if (fark is null)
-                return NotFound();
+            if (fark is null) return NotFound();
+
+            if (fark.Status == true) return BadRequest();
 
             fark.Order.Count -= 1;
+            fark.User.Coin += 1;
 
             _dbContext.Deposits.Remove(fark);
 
