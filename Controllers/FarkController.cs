@@ -50,6 +50,20 @@ namespace fark_t_backend.Controllers
             return Ok(userFarkModels.Select(user => _mapper.Map<GetDepositDto>(user)).ToList());
         }
 
+        [HttpGet("fark/eachOrder/{orderId}")]
+        public async Task<ActionResult<List<GetDepositDto>>> GetFarkbyoderID(Guid orderId)
+        {
+            var orderFarkModels = await _dbContext.Deposits
+                .Include(f => f.User)
+                .Include(f => f.Order)
+                .Include(f => f.Order.User)
+                .Where(f => f.Order.ID == orderId).ToListAsync();
+            if (orderFarkModels is null)
+                return NotFound();
+
+            return Ok(orderFarkModels.Select(order => _mapper.Map<GetDepositDto>(order)).ToList());
+        }
+
         [HttpPost("fark/create")]
         public async Task<ActionResult<GetDepositDto>> AddFark(CreateDepositDto request)
         {
