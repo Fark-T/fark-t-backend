@@ -29,7 +29,7 @@ namespace fark_t_backend.Controllers
                 .Include(f => f.Order)
                 .Include(f => f.User)
                 .Include(f => f.Order.User)
-                .FirstOrDefaultAsync(Deposit => Deposit.ID == id);
+                .FirstOrDefaultAsync(Deposit => Deposit.ID == id );
             if (fark is null)
             {
                 return BadRequest();
@@ -45,7 +45,7 @@ namespace fark_t_backend.Controllers
                 .Include(f => f.User)
                 .Include(f => f.Order)
                 .Include(f => f.Order.User)
-                .Where(f => f.User.ID == userId).ToListAsync();
+                .Where(f => f.User.ID == userId && f.Order.Status == true).ToListAsync();
             if (userFarkModels is null)
                 return NotFound();
   
