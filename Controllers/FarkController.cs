@@ -4,11 +4,13 @@ using fark_t_backend.Dto;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 
 namespace fark_t_backend.Controllers
 {
     [Route("/api")]
     [ApiController]
+    [Authorize]
     public class FarkController : ControllerBase
     {
         private readonly AppDbContext _dbContext;
@@ -48,6 +50,20 @@ namespace fark_t_backend.Controllers
                 return NotFound();
   
             return Ok(userFarkModels.Select(user => _mapper.Map<GetDepositDto>(user)).ToList());
+        }
+
+        [HttpGet("fark/eachOrder/{orderId}")]
+        public async Task<ActionResult<List<GetDepositDto>>> GetFarkbyoderID(Guid orderId)
+        {
+            var orderFarkModels = await _dbContext.Deposits
+                .Include(f => f.User)
+                .Include(f => f.Order)
+                .Include(f => f.Order.User)
+                .Where(f => f.Order.ID == orderId).ToListAsync();
+            if (orderFarkModels is null)
+                return NotFound();
+
+            return Ok(orderFarkModels.Select(order => _mapper.Map<GetDepositDto>(order)).ToList());
         }
 
         [HttpPost("fark/create")]
