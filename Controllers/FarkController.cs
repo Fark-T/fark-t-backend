@@ -70,6 +70,11 @@ namespace fark_t_backend.Controllers
                 return BadRequest("limit order");
             }
 
+            if (!order.Status)
+            {
+                return BadRequest("Order is not Active");
+            }
+
             user.Coin -= 1;
             order.Count += 1;
 
