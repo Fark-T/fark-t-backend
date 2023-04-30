@@ -29,12 +29,12 @@ public class OrdersController : ControllerBase
     }
 
     [AllowAnonymous]
-    [HttpGet("order")]
+    [HttpGet("order")] 
     public async Task<ActionResult<List<GetOrdersDto>>> GetOrders()
     {
         var id = _contextProvider.GetCurrentUser();
         var orders = await _dbContext.Orders
-            .Where(o => o.User.ID != id)
+            .Where(o => o.User.ID != id && o.Status == true)
             .Include(o => o.User)
             .ToListAsync();
         if (!orders.Any())
@@ -60,7 +60,7 @@ public class OrdersController : ControllerBase
     public async Task<ActionResult<List<GetOrdersDto>>> GetMyOrder(Guid id)
     {
         var myOrder = await _dbContext.Orders
-            .Where(o => o.User.ID == id)
+            .Where(o => o.User.ID == id && o.Status == true)
             .Include(o => o.User)
             .ToListAsync();
 
